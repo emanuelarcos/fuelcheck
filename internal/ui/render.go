@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -9,6 +10,19 @@ import (
 	"github.com/emarc09/fuelcheck/internal/i18n"
 	"github.com/emarc09/fuelcheck/internal/providers"
 )
+
+// redactEmail replaces an email with a masked version when FUELCHECK_REDACT_EMAIL is set.
+func redactEmail(email string) string {
+	if os.Getenv("FUELCHECK_REDACT_EMAIL") == "" || email == "" {
+		return email
+	}
+	parts := strings.SplitN(email, "@", 2)
+	if len(parts) != 2 {
+		return "***"
+	}
+	first := string(parts[0][0])
+	return first + "***@" + parts[1]
+}
 
 // Colors.
 var (
@@ -141,13 +155,15 @@ func renderProvider(r *providers.ProviderResult) string {
 func renderMetadata(r *providers.ProviderResult) string {
 	var parts []string
 
+	email := redactEmail(r.Email)
+
 	switch r.Provider {
 	case "Claude":
 		if r.Plan != "" {
 			parts = append(parts, labelStyle.Render(i18n.T("ui.plan"))+valueStyle.Render(r.Plan))
 		}
-		if r.Email != "" {
-			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(r.Email))
+		if email != "" {
+			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(email))
 		}
 		if r.Tier != "" {
 			parts = append(parts, labelStyle.Render(i18n.T("ui.tier"))+valueStyle.Render(r.Tier))
@@ -159,15 +175,15 @@ func renderMetadata(r *providers.ProviderResult) string {
 		if r.PlanType != "" {
 			parts = append(parts, labelStyle.Render(i18n.T("ui.plan"))+valueStyle.Render(r.PlanType))
 		}
-		if r.Email != "" {
-			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(r.Email))
+		if email != "" {
+			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(email))
 		}
 	case "Gemini":
 		if r.GeminiTier != "" {
 			parts = append(parts, labelStyle.Render(i18n.T("ui.tier"))+valueStyle.Render(r.GeminiTier))
 		}
-		if r.Email != "" {
-			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(r.Email))
+		if email != "" {
+			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(email))
 		}
 		if r.AuthMethod != "" {
 			parts = append(parts, labelStyle.Render(i18n.T("ui.auth"))+valueStyle.Render(r.AuthMethod))
@@ -179,8 +195,8 @@ func renderMetadata(r *providers.ProviderResult) string {
 		if r.PlanType != "" {
 			parts = append(parts, labelStyle.Render(i18n.T("ui.plan"))+valueStyle.Render(r.PlanType))
 		}
-		if r.Email != "" {
-			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(r.Email))
+		if email != "" {
+			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(email))
 		}
 	}
 

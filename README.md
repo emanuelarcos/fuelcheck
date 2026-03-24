@@ -17,25 +17,7 @@
 
 fuelcheck queries **Claude**, **Codex (ChatGPT)**, **Gemini**, and **Antigravity** in parallel to show how much of your rate limits you've used — right from your terminal.
 
-<!-- SCREENSHOT
-To generate a screenshot or GIF of fuelcheck in action:
-
-Option 1: Simple screenshot
-  ./fuelcheck | tee /dev/tty | cat    # then take a terminal screenshot
-
-Option 2: Using charmbracelet/vhs (recommended for GIFs)
-  1. Install vhs: brew install charmbracelet/tap/vhs
-  2. Create a tape file (fuelcheck.tape):
-       Output fuelcheck.gif
-       Set Width 900
-       Set Height 600
-       Type "./fuelcheck"
-       Enter
-       Sleep 3s
-  3. Run: vhs fuelcheck.tape
-  4. Replace this comment block with:
-       ![fuelcheck demo](fuelcheck.gif)
--->
+![fuelcheck demo](.vhs/demo.gif)
 
 ## Features
 
