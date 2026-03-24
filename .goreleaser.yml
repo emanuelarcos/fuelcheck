@@ -1,0 +1,62 @@
+version: 2
+
+project_name: fuelcheck
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: fuelcheck
+    main: ./cmd/fuelcheck/
+    binary: fuelcheck
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.Version={{.Version}}
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+
+release:
+  github:
+    owner: emanuelarcos
+    name: fuelcheck
+  draft: false
+  prerelease: auto
+  name_template: "{{.Tag}}"
+  header: |
+    ## fuelcheck {{.Tag}}
+
+    ### Install
+
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/emanuelarcos/fuelcheck/main/install.sh | sh
+    ```
+
+    Or download the binary for your platform below.

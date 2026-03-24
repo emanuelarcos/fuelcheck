@@ -1,0 +1,22 @@
+# Binaries (root level only)
+/fuelcheck
+/ai-limits
+*.exe
+
+# Go
+/vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Python legacy
+__pycache__/
+.ruff_cache/
+
+# Build
+dist/
