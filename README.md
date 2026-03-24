@@ -15,7 +15,7 @@
 
 ---
 
-fuelcheck queries **Claude**, **Codex (ChatGPT)**, **Gemini**, and **Antigravity** (Windsurf/Codeium) in parallel to show how much of your rate limits you've used — right from your terminal.
+fuelcheck queries **Claude**, **Codex (ChatGPT)**, **Gemini**, and **Antigravity** in parallel to show how much of your rate limits you've used — right from your terminal.
 
 <!-- SCREENSHOT
 To generate a screenshot or GIF of fuelcheck in action:
@@ -271,7 +271,7 @@ go vet ./...
 
 ## Disclaimer
 
-fuelcheck uses **internal/undocumented APIs** from each provider to fetch usage data. These endpoints can change or break without notice. This tool is not affiliated with or endorsed by Anthropic, OpenAI, Google, or Codeium.
+fuelcheck uses **internal/undocumented APIs** from each provider to fetch usage data. These endpoints can change or break without notice. This tool is not affiliated with or endorsed by Anthropic, OpenAI, Google.
 
 ## License
 
