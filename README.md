@@ -194,7 +194,7 @@ If the token is expired, fuelcheck refreshes it using the Gemini CLI's public OA
 <details>
 <summary><strong>Antigravity</strong> — credential discovery</summary>
 
-Antigravity (formerly Windsurf/Codeium) runs a local language server. fuelcheck detects it by:
+Antigravity runs a local language server. fuelcheck detects it by:
 
 1. Finding the process via `pgrep` (`language_server_macos_arm` on Apple Silicon, `language_server_linux` on Linux)
 2. Extracting the `--csrf_token` from the process arguments
