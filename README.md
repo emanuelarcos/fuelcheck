@@ -34,7 +34,7 @@ fuelcheck queries **Claude**, **Codex (ChatGPT)**, **Gemini**, and **Antigravity
 ## Quick Start
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/emanuelarcos/fuelcheck/main/install.sh | sh
+curl -fsSL https://github.com/emanuelarcos/fuelcheck/releases/latest/download/install.sh | sh
 fuelcheck
 ```
 
@@ -45,13 +45,13 @@ fuelcheck
 Detects your OS and architecture, downloads the latest release, and installs to `/usr/local/bin`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/emanuelarcos/fuelcheck/main/install.sh | sh
+curl -fsSL https://github.com/emanuelarcos/fuelcheck/releases/latest/download/install.sh | sh
 ```
 
 To install a specific version:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/emanuelarcos/fuelcheck/main/install.sh | sh -s v1.0.0
+curl -fsSL https://github.com/emanuelarcos/fuelcheck/releases/download/v0.2.0/install.sh | sh
 ```
 
 ### Pre-built binaries

@@ -50,13 +50,15 @@ release:
   draft: false
   prerelease: auto
   name_template: "{{.Tag}}"
+  extra_files:
+    - glob: install.sh
   header: |
     ## fuelcheck {{.Tag}}
 
     ### Install
 
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/emanuelarcos/fuelcheck/main/install.sh | sh
+    curl -fsSL https://github.com/emanuelarcos/fuelcheck/releases/latest/download/install.sh | sh
     ```
 
     Or download the binary for your platform below.
