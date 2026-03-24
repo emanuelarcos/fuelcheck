@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/emarc09/fuelcheck/internal/auth"
+	"github.com/emarc09/fuelcheck/internal/i18n"
 )
 
 const (
@@ -24,7 +25,6 @@ var geminiTiers = []struct {
 	{"Pro", []string{"gemini-2.5-pro", "gemini-3-pro-preview"}},
 }
 
-// FetchGeminiUsage fetches usage data from the Gemini API.
 func FetchGeminiUsage() *ProviderResult {
 	result := &ProviderResult{Provider: "Gemini", OK: false}
 
@@ -39,7 +39,7 @@ func FetchGeminiUsage() *ProviderResult {
 
 	if creds.AccessToken == "" && creds.APIKey != "" {
 		result.AuthMethod = "API Key"
-		result.Hint = "API key no soporta la API de cuota. Consultá https://aistudio.google.com"
+		result.Hint = i18n.T("err.gemini.api_key_hint")
 		result.OK = true
 		return result
 	}
@@ -48,7 +48,7 @@ func FetchGeminiUsage() *ProviderResult {
 
 	project, tier, err := geminiLoadCodeAssist(creds.AccessToken)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al cargar CodeAssist: %v", err)
+		result.Error = i18n.Tf("err.gemini.load_error", err)
 		return result
 	}
 
@@ -56,7 +56,7 @@ func FetchGeminiUsage() *ProviderResult {
 
 	buckets, err := geminiRetrieveUserQuota(creds.AccessToken, project)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al obtener cuota: %v", err)
+		result.Error = i18n.Tf("err.gemini.quota_error", err)
 		return result
 	}
 
@@ -127,20 +127,20 @@ func geminiLoadCodeAssist(token string) (project, tier string, err error) {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return "", "", fmt.Errorf("error de conexión: %w", err)
+		return "", "", fmt.Errorf("connection error: %w", err)
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", "", fmt.Errorf("error al leer respuesta: %w", err)
+		return "", "", fmt.Errorf("error reading response: %w", err)
 	}
 
 	if resp.StatusCode == http.StatusUnauthorized {
-		return "", "", fmt.Errorf("token de Gemini inválido o expirado (401)")
+		return "", "", fmt.Errorf("Gemini token invalid or expired (401)")
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", "", fmt.Errorf("loadCodeAssist respondió con status %d", resp.StatusCode)
+		return "", "", fmt.Errorf("loadCodeAssist responded with status %d", resp.StatusCode)
 	}
 
 	var result struct {
@@ -152,7 +152,7 @@ func geminiLoadCodeAssist(token string) (project, tier string, err error) {
 	}
 
 	if err := json.Unmarshal(respBody, &result); err != nil {
-		return "", "", fmt.Errorf("error al parsear respuesta: %w", err)
+		return "", "", fmt.Errorf("error parsing response: %w", err)
 	}
 
 	tier = result.CurrentTier.Name
@@ -180,24 +180,24 @@ func geminiRetrieveUserQuota(token, project string) ([]quotaBucket, error) {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error de conexión: %w", err)
+		return nil, fmt.Errorf("connection error: %w", err)
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error al leer respuesta: %w", err)
+		return nil, fmt.Errorf("error reading response: %w", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("retrieveUserQuota respondió con status %d", resp.StatusCode)
+		return nil, fmt.Errorf("retrieveUserQuota responded with status %d", resp.StatusCode)
 	}
 
 	var result struct {
 		Buckets []quotaBucket `json:"buckets"`
 	}
 	if err := json.Unmarshal(respBody, &result); err != nil {
-		return nil, fmt.Errorf("error al parsear respuesta: %w", err)
+		return nil, fmt.Errorf("error parsing response: %w", err)
 	}
 
 	return result.Buckets, nil

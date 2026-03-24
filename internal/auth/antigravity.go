@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/emarc09/fuelcheck/internal/i18n"
 )
 
 // AntigravityCredentials holds the locally-discovered Antigravity credentials.
@@ -27,7 +29,7 @@ func GetAntigravityCredentials() (*AntigravityCredentials, error) {
 
 	ports, err := discoverPorts(pid)
 	if err != nil || len(ports) == 0 {
-		return nil, fmt.Errorf("no se encontraron puertos TCP para Antigravity (PID %d)", pid)
+		return nil, fmt.Errorf("%s", i18n.Tf("err.antigravity.no_ports", pid))
 	}
 
 	return &AntigravityCredentials{
@@ -60,7 +62,7 @@ func findAntigravityProcess() (pid int, csrfToken string, extPort int, err error
 	binaryName := antigravityBinaryName()
 	out, err := exec.CommandContext(ctx, "pgrep", "-lf", binaryName).Output()
 	if err != nil {
-		return 0, "", 0, fmt.Errorf("Antigravity no está corriendo")
+		return 0, "", 0, fmt.Errorf("%s", i18n.T("err.antigravity.not_running"))
 	}
 
 	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
@@ -91,7 +93,7 @@ func findAntigravityProcess() (pid int, csrfToken string, extPort int, err error
 		return p, csrf, ext, nil
 	}
 
-	return 0, "", 0, fmt.Errorf("Antigravity no está corriendo")
+	return 0, "", 0, fmt.Errorf("%s", i18n.T("err.antigravity.not_running"))
 }
 
 func isAntigravityProcess(line string) bool {

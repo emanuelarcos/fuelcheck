@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/emarc09/fuelcheck/internal/auth"
+	"github.com/emarc09/fuelcheck/internal/i18n"
 )
 
 const (
@@ -19,7 +20,6 @@ const (
 
 var antigravityRequestBody = []byte(`{"metadata":{"ideName":"antigravity","extensionName":"antigravity","ideVersion":"unknown","locale":"en"}}`)
 
-// antigravityHTTPSClient handles self-signed certs on localhost.
 var antigravityHTTPSClient = &http.Client{
 	Timeout: 8 * time.Second,
 	Transport: &http.Transport{
@@ -29,7 +29,6 @@ var antigravityHTTPSClient = &http.Client{
 
 var antigravityHTTPClient = &http.Client{Timeout: 8 * time.Second}
 
-// FetchAntigravityUsage probes the local Antigravity process for usage data.
 func FetchAntigravityUsage() *ProviderResult {
 	result := &ProviderResult{Provider: "Antigravity", OK: false}
 
@@ -39,8 +38,6 @@ func FetchAntigravityUsage() *ProviderResult {
 		return result
 	}
 
-	// Try GetUserStatus first (returns email + plan + quotas).
-	// Strategy: HTTPS on all ports first, then HTTP on extension port.
 	if resp := tryAntigravityEndpoint(creds, antigravityGetUserStatus); resp != nil {
 		var usr antigravityUserStatusResponse
 		if json.Unmarshal(resp, &usr) == nil && len(usr.UserStatus.CascadeModelConfigData.ClientModelConfigs) > 0 {
@@ -48,7 +45,6 @@ func FetchAntigravityUsage() *ProviderResult {
 		}
 	}
 
-	// Fallback: GetCommandModelConfigs (quotas only, no email/plan).
 	if resp := tryAntigravityEndpoint(creds, antigravityGetCommandModelCfgs); resp != nil {
 		var cfg antigravityModelConfigsResponse
 		if json.Unmarshal(resp, &cfg) == nil && len(cfg.ClientModelConfigs) > 0 {
@@ -56,11 +52,10 @@ func FetchAntigravityUsage() *ProviderResult {
 		}
 	}
 
-	result.Error = "no se pudo conectar a la API local de Antigravity"
+	result.Error = i18n.T("err.antigravity.no_connect")
 	return result
 }
 
-// tryAntigravityEndpoint tries HTTPS on all ports, then HTTP on extension port.
 func tryAntigravityEndpoint(creds *auth.AntigravityCredentials, path string) []byte {
 	for _, port := range creds.Ports {
 		if resp, err := antigravityPost(antigravityHTTPSClient, "https", port, path, creds.CSRFToken); err == nil {
@@ -111,7 +106,7 @@ func parseAntigravityUserStatus(result *ProviderResult, usr *antigravityUserStat
 	result.RawJSON = usr
 
 	if len(result.Models) == 0 {
-		result.Error = "no se encontraron modelos con cuota"
+		result.Error = i18n.T("err.antigravity.no_models")
 		return result
 	}
 
@@ -124,7 +119,7 @@ func parseAntigravityModelConfigs(result *ProviderResult, cfg *antigravityModelC
 	result.RawJSON = cfg
 
 	if len(result.Models) == 0 {
-		result.Error = "no se encontraron modelos con cuota"
+		result.Error = i18n.T("err.antigravity.no_models")
 		return result
 	}
 

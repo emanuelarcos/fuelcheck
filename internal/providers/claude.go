@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/emarc09/fuelcheck/internal/auth"
+	"github.com/emarc09/fuelcheck/internal/i18n"
 )
 
 const (
@@ -16,15 +17,15 @@ const (
 	claudeOrgsURL       = "https://claude.ai/api/organizations"
 )
 
-// claudeWindowDefs defines the usage windows to parse from the API response.
-var claudeWindowDefs = []struct {
-	key   string
-	label string
+// claudeWindowKeys maps API keys to i18n translation keys.
+var claudeWindowKeys = []struct {
+	apiKey  string
+	i18nKey string
 }{
-	{"five_hour", "Límite de uso de 5 horas"},
-	{"seven_day", "Límite de uso semanal"},
-	{"seven_day_sonnet", "Límite semanal Sonnet"},
-	{"seven_day_opus", "Límite semanal Opus"},
+	{"five_hour", "window.5h"},
+	{"seven_day", "window.weekly"},
+	{"seven_day_sonnet", "window.weekly_sonnet"},
+	{"seven_day_opus", "window.weekly_opus"},
 }
 
 // FetchClaudeUsage fetches usage data from Claude's API.
@@ -37,30 +38,26 @@ func FetchClaudeUsage() *ProviderResult {
 		return result
 	}
 
-	// Try OAuth path first.
 	if creds != nil && creds.Token != "" {
 		oauthResult := fetchClaudeOAuth(creds)
 		if oauthResult != nil {
 			return oauthResult
 		}
-		// OAuth returned 403 — fall through to web session if available.
 	}
 
-	// Web session fallback.
 	if webSession != nil {
 		return fetchClaudeWeb(webSession)
 	}
 
 	if creds != nil {
-		result.Error = "OAuth token inválido y no hay sesión web disponible"
+		result.Error = i18n.T("err.claude.oauth_invalid")
 		return result
 	}
 
-	result.Error = "no se encontraron credenciales de Claude"
+	result.Error = i18n.T("err.claude.no_creds_found")
 	return result
 }
 
-// fetchClaudeOAuth fetches usage via the OAuth API.
 func fetchClaudeOAuth(creds *auth.ClaudeCredentials) *ProviderResult {
 	result := &ProviderResult{
 		Provider: "Claude",
@@ -73,7 +70,7 @@ func fetchClaudeOAuth(creds *auth.ClaudeCredentials) *ProviderResult {
 
 	req, err := http.NewRequest("GET", claudeOAuthUsageURL, nil)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al crear request: %v", err)
+		result.Error = i18n.Tf("err.create_request", err)
 		return result
 	}
 
@@ -85,38 +82,37 @@ func fetchClaudeOAuth(creds *auth.ClaudeCredentials) *ProviderResult {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		result.Error = fmt.Sprintf("error de conexión: %v", err)
+		result.Error = i18n.Tf("err.connection", err)
 		return result
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusForbidden {
-		return nil // signal to fall through to web session
+		return nil
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al leer respuesta: %v", err)
+		result.Error = i18n.Tf("err.read_response", err)
 		return result
 	}
 
 	if resp.StatusCode == http.StatusTooManyRequests {
-		result.Error = "Too many requests — esperá unos minutos e intentá de nuevo"
+		result.Error = i18n.T("err.too_many_requests")
 		return result
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		result.Error = fmt.Sprintf("API respondió con status %d", resp.StatusCode)
+		result.Error = i18n.Tf("err.api_status", resp.StatusCode)
 		return result
 	}
 
 	var usage map[string]json.RawMessage
 	if err := json.Unmarshal(body, &usage); err != nil {
-		result.Error = fmt.Sprintf("error al parsear JSON: %v", err)
+		result.Error = i18n.Tf("err.parse_json", err)
 		return result
 	}
 
-	// Store raw JSON for --json mode.
 	var rawJSON interface{}
 	_ = json.Unmarshal(body, &rawJSON)
 	result.RawJSON = map[string]interface{}{
@@ -135,13 +131,12 @@ func fetchClaudeOAuth(creds *auth.ClaudeCredentials) *ProviderResult {
 	return result
 }
 
-// fetchClaudeWeb fetches usage via the web session API.
 func fetchClaudeWeb(ws *auth.ClaudeWebSession) *ProviderResult {
 	result := &ProviderResult{Provider: "Claude", OK: false, Source: "web"}
 
 	req, err := http.NewRequest("GET", claudeOrgsURL, nil)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al crear request: %v", err)
+		result.Error = i18n.Tf("err.create_request", err)
 		return result
 	}
 	req.Header.Set("Cookie", "sessionKey="+ws.SessionKey)
@@ -150,24 +145,24 @@ func fetchClaudeWeb(ws *auth.ClaudeWebSession) *ProviderResult {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al obtener organizaciones: %v", err)
+		result.Error = i18n.Tf("err.claude.orgs_error", err)
 		return result
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al leer respuesta: %v", err)
+		result.Error = i18n.Tf("err.read_response", err)
 		return result
 	}
 	if resp.StatusCode != http.StatusOK {
-		result.Error = fmt.Sprintf("error al obtener organizaciones: status %d", resp.StatusCode)
+		result.Error = i18n.Tf("err.claude.orgs_status", resp.StatusCode)
 		return result
 	}
 
 	var orgs []map[string]interface{}
 	if err := json.Unmarshal(body, &orgs); err != nil || len(orgs) == 0 {
-		result.Error = "no se encontraron organizaciones"
+		result.Error = i18n.T("err.claude.no_orgs")
 		return result
 	}
 
@@ -184,7 +179,7 @@ func fetchClaudeWeb(ws *auth.ClaudeWebSession) *ProviderResult {
 	usageURL := fmt.Sprintf("https://claude.ai/api/organizations/%s/usage", orgUUID)
 	req2, err := http.NewRequest("GET", usageURL, nil)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al crear request: %v", err)
+		result.Error = i18n.Tf("err.create_request", err)
 		return result
 	}
 	req2.Header.Set("Cookie", "sessionKey="+ws.SessionKey)
@@ -193,24 +188,24 @@ func fetchClaudeWeb(ws *auth.ClaudeWebSession) *ProviderResult {
 
 	resp2, err := httpClient.Do(req2)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al obtener uso: %v", err)
+		result.Error = i18n.Tf("err.claude.usage_error", err)
 		return result
 	}
 	defer resp2.Body.Close()
 
 	body2, err := io.ReadAll(resp2.Body)
 	if err != nil {
-		result.Error = fmt.Sprintf("error al leer respuesta de uso: %v", err)
+		result.Error = i18n.Tf("err.claude.usage_read_error", err)
 		return result
 	}
 	if resp2.StatusCode != http.StatusOK {
-		result.Error = fmt.Sprintf("error al obtener uso: status %d", resp2.StatusCode)
+		result.Error = i18n.Tf("err.claude.usage_status", resp2.StatusCode)
 		return result
 	}
 
 	var usage map[string]json.RawMessage
 	if err := json.Unmarshal(body2, &usage); err != nil {
-		result.Error = fmt.Sprintf("error al parsear uso: %v", err)
+		result.Error = i18n.Tf("err.claude.usage_parse", err)
 		return result
 	}
 
@@ -231,8 +226,8 @@ func fetchClaudeWeb(ws *auth.ClaudeWebSession) *ProviderResult {
 func parseClaudeWindows(usage map[string]json.RawMessage) []UsageWindow {
 	var windows []UsageWindow
 
-	for _, wd := range claudeWindowDefs {
-		raw, ok := usage[wd.key]
+	for _, wd := range claudeWindowKeys {
+		raw, ok := usage[wd.apiKey]
 		if !ok {
 			continue
 		}
@@ -250,7 +245,6 @@ func parseClaudeWindows(usage map[string]json.RawMessage) []UsageWindow {
 			usedPct *= 100
 		}
 
-		// Skip sub-model windows with zero usage — they're noise.
 		if usedPct == 0 && window.ResetsAt == "" {
 			continue
 		}
@@ -258,7 +252,7 @@ func parseClaudeWindows(usage map[string]json.RawMessage) []UsageWindow {
 		remaining := max(0, int(100-usedPct+0.5))
 
 		w := UsageWindow{
-			Label:       wd.label,
+			Label:       i18n.T(wd.i18nKey),
 			UsedPercent: usedPct,
 			Remaining:   remaining,
 		}
@@ -275,7 +269,7 @@ func parseClaudeWindows(usage map[string]json.RawMessage) []UsageWindow {
 	return windows
 }
 
-// ParseISO8601 parses ISO 8601 timestamps (with or without trailing Z).
+// ParseISO8601 parses ISO 8601 timestamps.
 func ParseISO8601(s string) *time.Time {
 	s = strings.TrimSpace(s)
 	formats := []string{
@@ -292,7 +286,6 @@ func ParseISO8601(s string) *time.Time {
 	return nil
 }
 
-// capitalize capitalizes the first letter of a string.
 func capitalize(s string) string {
 	if len(s) == 0 {
 		return s
@@ -300,7 +293,7 @@ func capitalize(s string) string {
 	return strings.ToUpper(s[:1]) + s[1:]
 }
 
-// CleanPlanName converts raw subscription type strings to display names.
+// CleanPlanName is exported for tests.
 func CleanPlanName(s string) string {
 	return cleanPlanName(s)
 }

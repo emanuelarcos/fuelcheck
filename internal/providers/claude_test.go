@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 	"time"
+
+	"github.com/emarc09/fuelcheck/internal/i18n"
 )
 
 func TestParseISO8601(t *testing.T) {
@@ -89,8 +91,10 @@ func TestParseClaudeWindows(t *testing.T) {
 		t.Errorf("seven_day remaining = %d, want 90", windows[1].Remaining)
 	}
 
-	if windows[2].Label != "Límite semanal Opus" {
-		t.Errorf("third window label = %q, want Límite semanal Opus", windows[2].Label)
+	// Default lang is EN.
+	expectedLabel := i18n.T("window.weekly_opus")
+	if windows[2].Label != expectedLabel {
+		t.Errorf("third window label = %q, want %q", windows[2].Label, expectedLabel)
 	}
 	if windows[2].Remaining != 70 {
 		t.Errorf("seven_day_opus remaining = %d, want 70", windows[2].Remaining)

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/emarc09/fuelcheck/internal/i18n"
 	"github.com/emarc09/fuelcheck/internal/providers"
 )
 
@@ -55,11 +56,6 @@ var (
 
 const barWidth = 22
 
-var spanishMonths = []string{
-	"", "ene", "feb", "mar", "abr", "may", "jun",
-	"jul", "ago", "sep", "oct", "nov", "dic",
-}
-
 // Banner returns the styled fuelcheck banner string.
 func Banner() string {
 	return renderBanner()
@@ -76,7 +72,7 @@ func renderBanner() string {
 	line2 := flameTopStyle.Render(" )\\) ") + nameStyle.Render("┣╸ ┃ ┃┣╸ ┃  ┃  ┣━┫┣╸ ┃  ┣┻┓")
 	line3 := flameStyle.Render("((_) ") + nameStyle.Render("╹  ┗━┛┗━╸┗━╸┗━╸╹ ╹┗━╸┗━╸╹ ╹")
 
-	tagline := tagStyle.Render("            AI subscription usage")
+	tagline := tagStyle.Render("            " + i18n.T("ui.tagline"))
 
 	return line1 + "\n" + line2 + "\n" + line3 + "\n" + tagline
 }
@@ -124,7 +120,7 @@ func renderProvider(r *providers.ProviderResult) string {
 		lines = append(lines, "")
 		lines = append(lines, renderBar(w.Remaining))
 		if w.ResetsAt != nil {
-			lines = append(lines, dimStyle.Render("Se restablecerá: "+formatSpanishTime(w.ResetsAt)))
+			lines = append(lines, dimStyle.Render(i18n.Tf("ui.resets_at", formatTime(w.ResetsAt))))
 		}
 	}
 
@@ -135,7 +131,7 @@ func renderProvider(r *providers.ProviderResult) string {
 		lines = append(lines, "")
 		lines = append(lines, renderBar(remaining))
 		if m.ResetsAt != nil {
-			lines = append(lines, dimStyle.Render("Se restablecerá: "+formatSpanishTime(m.ResetsAt)))
+			lines = append(lines, dimStyle.Render(i18n.Tf("ui.resets_at", formatTime(m.ResetsAt))))
 		}
 	}
 
@@ -148,43 +144,43 @@ func renderMetadata(r *providers.ProviderResult) string {
 	switch r.Provider {
 	case "Claude":
 		if r.Plan != "" {
-			parts = append(parts, labelStyle.Render("Plan: ")+valueStyle.Render(r.Plan))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.plan"))+valueStyle.Render(r.Plan))
 		}
 		if r.Email != "" {
-			parts = append(parts, labelStyle.Render("Email: ")+valueStyle.Render(r.Email))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(r.Email))
 		}
 		if r.Tier != "" {
-			parts = append(parts, labelStyle.Render("Tier: ")+valueStyle.Render(r.Tier))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.tier"))+valueStyle.Render(r.Tier))
 		}
 		if r.Source != "" {
-			parts = append(parts, labelStyle.Render("Fuente: ")+valueStyle.Render(r.Source))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.source"))+valueStyle.Render(r.Source))
 		}
 	case "Codex":
 		if r.PlanType != "" {
-			parts = append(parts, labelStyle.Render("Plan: ")+valueStyle.Render(r.PlanType))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.plan"))+valueStyle.Render(r.PlanType))
 		}
 		if r.Email != "" {
-			parts = append(parts, labelStyle.Render("Email: ")+valueStyle.Render(r.Email))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(r.Email))
 		}
 	case "Gemini":
 		if r.GeminiTier != "" {
-			parts = append(parts, labelStyle.Render("Tier: ")+valueStyle.Render(r.GeminiTier))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.tier"))+valueStyle.Render(r.GeminiTier))
 		}
 		if r.Email != "" {
-			parts = append(parts, labelStyle.Render("Email: ")+valueStyle.Render(r.Email))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(r.Email))
 		}
 		if r.AuthMethod != "" {
-			parts = append(parts, labelStyle.Render("Auth: ")+valueStyle.Render(r.AuthMethod))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.auth"))+valueStyle.Render(r.AuthMethod))
 		}
 		if r.TokenRefreshed {
-			parts = append(parts, dimStyle.Render("(token refrescado)"))
+			parts = append(parts, dimStyle.Render(i18n.T("ui.token_refreshed")))
 		}
 	case "Antigravity":
 		if r.PlanType != "" {
-			parts = append(parts, labelStyle.Render("Plan: ")+valueStyle.Render(r.PlanType))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.plan"))+valueStyle.Render(r.PlanType))
 		}
 		if r.Email != "" {
-			parts = append(parts, labelStyle.Render("Email: ")+valueStyle.Render(r.Email))
+			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(r.Email))
 		}
 	}
 
@@ -214,12 +210,12 @@ func renderBar(remainingPct int) string {
 
 	barFilled := lipgloss.NewStyle().Foreground(accent).Render(strings.Repeat("█", filled))
 	barEmpty := dimStyle.Render(strings.Repeat("░", empty))
-	pctText := lipgloss.NewStyle().Bold(true).Foreground(accent).Render(fmt.Sprintf(" %d%% restante", remainingPct))
+	pctText := lipgloss.NewStyle().Bold(true).Foreground(accent).Render(" " + i18n.Tf("ui.remaining", remainingPct))
 
 	return barFilled + barEmpty + pctText
 }
 
-func formatSpanishTime(t *time.Time) string {
+func formatTime(t *time.Time) string {
 	if t == nil {
 		return ""
 	}
@@ -228,9 +224,9 @@ func formatSpanishTime(t *time.Time) string {
 
 	hour := t.Hour()
 	minute := t.Minute()
-	ampm := "a.m."
+	ampm := i18n.T("time.am")
 	if hour >= 12 {
-		ampm = "p.m."
+		ampm = i18n.T("time.pm")
 	}
 	if hour > 12 {
 		hour -= 12
@@ -245,6 +241,9 @@ func formatSpanishTime(t *time.Time) string {
 		return timeStr
 	}
 
-	month := spanishMonths[t.Month()]
-	return fmt.Sprintf("%d %s %d %s", t.Day(), month, t.Year(), timeStr)
+	month := i18n.MonthName(int(t.Month()))
+	if i18n.Current() == i18n.ES {
+		return fmt.Sprintf("%d %s %d %s", t.Day(), month, t.Year(), timeStr)
+	}
+	return fmt.Sprintf("%s %d, %d %s", month, t.Day(), t.Year(), timeStr)
 }

@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/emarc09/fuelcheck/internal/i18n"
 )
 
 const (
@@ -77,8 +79,7 @@ func GetGeminiCredentials() (*GeminiCredentials, error) {
 	}
 
 	if creds.AccessToken == "" && creds.APIKey == "" {
-		return nil, fmt.Errorf("no se encontraron credenciales de Gemini.\n" +
-			"Configurá GEMINI_API_KEY o iniciá sesión con Gemini CLI")
+		return nil, fmt.Errorf("%s", i18n.T("err.gemini.no_creds"))
 	}
 
 	return creds, nil

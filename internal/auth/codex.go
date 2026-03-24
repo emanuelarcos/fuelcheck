@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/emarc09/fuelcheck/internal/i18n"
 )
 
 const (
@@ -64,8 +66,7 @@ func GetCodexCredentials() (*CodexCredentials, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("no se encontró ~/.codex/auth.json.\n" +
-		"Iniciá sesión con Codex CLI primero")
+	return nil, fmt.Errorf("%s", i18n.T("err.codex.no_auth"))
 }
 
 // RefreshToken refreshes the access token using the refresh token.

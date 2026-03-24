@@ -10,6 +10,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/emarc09/fuelcheck/internal/i18n"
 )
 
 // ClaudeCredentials holds the resolved Claude authentication.
@@ -87,8 +89,7 @@ func GetClaudeCredentials() (*ClaudeCredentials, *ClaudeWebSession, error) {
 		return nil, ws, nil
 	}
 
-	return nil, nil, fmt.Errorf("no se encontraron credenciales de Claude.\n" +
-		"Configurá CLAUDE_CODE_OAUTH_TOKEN o iniciá sesión con Claude Code")
+	return nil, nil, fmt.Errorf("%s", i18n.T("err.claude.no_creds"))
 }
 
 func loadLocalClaudeOAuthToken() (token, source string) {
