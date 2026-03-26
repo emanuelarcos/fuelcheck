@@ -22,9 +22,10 @@ var allProviders = map[string]func() *providers.ProviderResult{
 	"codex":       providers.FetchCodexUsage,
 	"gemini":      providers.FetchGeminiUsage,
 	"antigravity": providers.FetchAntigravityUsage,
+	"windsurf":    providers.FetchWindsurfUsage,
 }
 
-var providerOrder = []string{"claude", "codex", "gemini", "antigravity"}
+var providerOrder = []string{"claude", "codex", "gemini", "antigravity", "windsurf"}
 
 var (
 	jsonMode bool

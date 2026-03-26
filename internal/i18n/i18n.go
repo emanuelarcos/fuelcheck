@@ -100,8 +100,8 @@ var translations = map[Lang]map[string]string{
 
 		// CLI
 		"cli.short":            "Check your AI subscription usage",
-		"cli.long_desc":        "Queries your AI subscription usage in parallel\nfor Claude, Codex, Gemini and Antigravity.",
-		"cli.providers":        "Available providers: claude, codex, gemini, antigravity",
+		"cli.long_desc":        "Queries your AI subscription usage in parallel\nfor Claude, Codex, Gemini, Antigravity and Windsurf.",
+		"cli.providers":        "Available providers: claude, codex, gemini, antigravity, windsurf",
 		"cli.json_flag":        "Output in JSON format",
 		"cli.lang_flag":        "Language (en, es). Auto-detected from system locale",
 		"cli.all_failed":       "all providers failed",
@@ -143,6 +143,15 @@ var translations = map[Lang]map[string]string{
 		"err.antigravity.no_ports":    "no TCP ports found for Antigravity (PID %d)",
 		"err.antigravity.no_connect":  "could not connect to Antigravity's local API",
 		"err.antigravity.no_models":   "no models with quota found",
+
+		// Windsurf errors
+		"err.windsurf.not_running":   "Windsurf is not running",
+		"err.windsurf.not_installed": "Windsurf is not installed",
+		"err.windsurf.no_ports":      "no TCP ports found for Windsurf (PID %d)",
+		"err.windsurf.no_csrf":       "could not extract CSRF token from Windsurf process",
+		"err.windsurf.no_api_key":    "could not read Windsurf API key",
+		"err.windsurf.no_connect":    "could not connect to Windsurf's local API",
+		"err.windsurf.no_data":       "no usage data found for Windsurf",
 	},
 
 	ES: {
@@ -174,8 +183,8 @@ var translations = map[Lang]map[string]string{
 
 		// CLI
 		"cli.short":            "Consulta el estado de uso de tus suscripciones de IA",
-		"cli.long_desc":        "Consulta en paralelo el estado de uso de tus suscripciones\nde Claude, Codex, Gemini y Antigravity.",
-		"cli.providers":        "Proveedores disponibles: claude, codex, gemini, antigravity",
+		"cli.long_desc":        "Consulta en paralelo el estado de uso de tus suscripciones\nde Claude, Codex, Gemini, Antigravity y Windsurf.",
+		"cli.providers":        "Proveedores disponibles: claude, codex, gemini, antigravity, windsurf",
 		"cli.json_flag":        "Salida en formato JSON",
 		"cli.lang_flag":        "Idioma (en, es). Se detecta automáticamente del sistema",
 		"cli.all_failed":       "todos los proveedores fallaron",
@@ -217,6 +226,15 @@ var translations = map[Lang]map[string]string{
 		"err.antigravity.no_ports":    "no se encontraron puertos TCP para Antigravity (PID %d)",
 		"err.antigravity.no_connect":  "no se pudo conectar a la API local de Antigravity",
 		"err.antigravity.no_models":   "no se encontraron modelos con cuota",
+
+		// Windsurf errors
+		"err.windsurf.not_running":   "Windsurf no está corriendo",
+		"err.windsurf.not_installed": "Windsurf no está instalado",
+		"err.windsurf.no_ports":      "no se encontraron puertos TCP para Windsurf (PID %d)",
+		"err.windsurf.no_csrf":       "no se pudo extraer el token CSRF del proceso de Windsurf",
+		"err.windsurf.no_api_key":    "no se pudo leer la clave API de Windsurf",
+		"err.windsurf.no_connect":    "no se pudo conectar a la API local de Windsurf",
+		"err.windsurf.no_data":       "no se encontraron datos de uso para Windsurf",
 	},
 }
 
