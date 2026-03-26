@@ -15,13 +15,13 @@
 
 ---
 
-fuelcheck queries **Claude**, **Codex (ChatGPT)**, **Gemini**, and **Antigravity** in parallel to show how much of your rate limits you've used — right from your terminal.
+fuelcheck queries **Claude**, **Codex (ChatGPT)**, **Gemini**, **Antigravity**, and **Windsurf** in parallel to show how much of your rate limits you've used — right from your terminal.
 
 ![fuelcheck demo](.vhs/demo.gif)
 
 ## Features
 
-- **4 providers** — Claude, Codex, Gemini, Antigravity
+- **5 providers** — Claude, Codex, Gemini, Antigravity, Windsurf
 - **Parallel fetching** — all providers queried concurrently via goroutines
 - **Terminal UI** — styled cards, color-coded progress bars ([lipgloss](https://github.com/charmbracelet/lipgloss))
 - **JSON output** — `--json` flag for scripting and piping to `jq`
@@ -120,6 +120,7 @@ fuelcheck --json | jq '.[] | {provider: .provider, error: .error}'
 | Codex       | 5-hour and weekly usage windows      | OAuth token + auto-refresh   | Logged into Codex CLI         |
 | Gemini      | Per-model tier quotas (Flash, Pro)   | OAuth token + auto-refresh   | Logged into Gemini CLI        |
 | Antigravity | Per-model quotas (all available models) | Local process detection   | Desktop app running           |
+| Windsurf    | Plan quotas (daily, weekly, credits)               | Local process detection   | Desktop app running           |
 
 <details>
 <summary><strong>Claude</strong> — credential discovery</summary>
@@ -187,6 +188,22 @@ Antigravity runs a local language server. fuelcheck detects it by:
 
 </details>
 
+<details>
+<summary><strong>Windsurf</strong> — credential discovery</summary>
+
+Windsurf runs a local language server. fuelcheck detects it by:
+
+1. Finding the process via `pgrep` (`language_server_macos_arm` on Apple Silicon, `language_server_linux` on Linux)
+2. Matching the process by its `--ide_name windsurf` argument or `/Windsurf.app/` path
+3. Extracting the CSRF token from the `WINDSURF_CSRF_TOKEN` environment variable (via `ps -E`)
+4. Reading the API key from Windsurf's local state database (`sqlite3`)
+5. Discovering TCP ports via `lsof` (macOS) or `ss` (Linux)
+6. Querying the local gRPC endpoint with the CSRF token and API key
+
+**The Windsurf desktop app must be running** for this provider to work. Requires `sqlite3` CLI.
+
+</details>
+
 ## Project Structure
 
 ```
@@ -198,12 +215,14 @@ Antigravity runs a local language server. fuelcheck detects it by:
 │   │   ├── claude.go         # Keychain, env vars, config files, web session
 │   │   ├── codex.go          # auth.json parsing, token refresh, JWT email
 │   │   ├── gemini.go         # OAuth creds, token refresh, CLI client discovery
-│   │   └── antigravity.go    # Process detection, CSRF extraction, port discovery
+│   │   ├── antigravity.go    # Process detection, CSRF extraction, port discovery
+│   │   └── windsurf.go       # Process detection, CSRF extraction, port discovery
 │   ├── providers/            # API clients
 │   │   ├── claude.go         # OAuth + web session APIs
 │   │   ├── codex.go          # ChatGPT backend API
 │   │   ├── gemini.go         # GCP CodeAssist + quota APIs
 │   │   ├── antigravity.go    # Local gRPC endpoint
+│   │   ├── windsurf.go       # Local gRPC endpoint
 │   │   └── types.go          # Shared types (ProviderResult, UsageWindow, ModelQuota)
 │   └── ui/                   # Terminal rendering (lipgloss)
 │       └── render.go         # Cards, progress bars, banner, color coding

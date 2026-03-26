@@ -198,6 +198,13 @@ func renderMetadata(r *providers.ProviderResult) string {
 		if email != "" {
 			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(email))
 		}
+	case "Windsurf":
+		if r.PlanType != "" {
+			parts = append(parts, labelStyle.Render(i18n.T("ui.plan"))+valueStyle.Render(r.PlanType))
+		}
+		if email != "" {
+			parts = append(parts, labelStyle.Render(i18n.T("ui.email"))+valueStyle.Render(email))
+		}
 	}
 
 	return strings.Join(parts, "\n")
